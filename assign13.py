@@ -113,22 +113,22 @@ def simulate_query(refined_sql):
         conn.close()
 def clean_sql(sql: str) -> str:
     """
-    Clean the model's response to extract only the SQL query.
-    Removes markdown code fences and any non-SQL explanation lines.
+    Extracts and returns only the actual SQL query from the model's response.
+    Ensures no commentary or markdown formatting remains.
     """
-    # Remove markdown formatting and split lines
-    sql = sql.strip()
-    sql = sql.replace("```sql", "").replace("```", "")
-    
-    # Remove leading 'Refined SQL:' or 'Initial SQL:' if present
-    if sql.lower().startswith("refined sql:") or sql.lower().startswith("initial sql:"):
+    # Remove markdown code block markers
+    sql = sql.replace("```sql", "").replace("```", "").strip()
+
+    # If 'Refined SQL:' or similar prefix exists, remove it
+    if sql.lower().startswith("refined sql:"):
         sql = sql.split(":", 1)[1].strip()
 
-    # Only keep lines that look like SQL (basic heuristic)
-    sql_lines = sql.splitlines()
-    sql_lines = [line for line in sql_lines if not line.lower().startswith("in sqlite") and not line.strip().startswith("--")]
-    
-    return "\n".join(sql_lines).strip()
+    # Only keep lines until the first semicolon to avoid extra comments
+    if ";" in sql:
+        sql = sql.split(";", 1)[0] + ";"
+
+    return sql.strip()
+
 
 def main():
     # Step 1: Accept user question
