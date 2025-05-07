@@ -1,6 +1,7 @@
 import json
 import requests
 import time
+import re
 
 API_URL = "https://openai-api-wrapper-urtjok3rza-wl.a.run.app/api/chat/completions/"
 HEADERS = {
@@ -110,6 +111,24 @@ def simulate_query(refined_sql):
 
     finally:
         conn.close()
+def clean_sql(sql: str) -> str:
+    """
+    Clean the model's response to extract only the SQL query.
+    Removes markdown code fences and any non-SQL explanation lines.
+    """
+    # Remove markdown formatting and split lines
+    sql = sql.strip()
+    sql = sql.replace("```sql", "").replace("```", "")
+    
+    # Remove leading 'Refined SQL:' or 'Initial SQL:' if present
+    if sql.lower().startswith("refined sql:") or sql.lower().startswith("initial sql:"):
+        sql = sql.split(":", 1)[1].strip()
+
+    # Only keep lines that look like SQL (basic heuristic)
+    sql_lines = sql.splitlines()
+    sql_lines = [line for line in sql_lines if not line.lower().startswith("in sqlite") and not line.strip().startswith("--")]
+    
+    return "\n".join(sql_lines).strip()
 
 def main():
     # Step 1: Accept user question
@@ -119,7 +138,7 @@ def main():
     schema_str = "\n".join([f"Table: {table}\nColumns: {', '.join(cols)}" for table, cols in MOCK_SCHEMA.items()])
 
     # Step 3: Generate SQL
-    system_prompt_gen = "You are an expert database assistant. You will generate SQL queries based on user questions and provided schema."
+    system_prompt_gen = "You are an expert database assistant. You will generate SQLite queries based on user questions and provided schema."
     user_prompt_gen = f"Schema:\n{schema_str}\n\nUser Question:\n{question}\n\nGenerate a valid SQL query for the above."
 
     initial_sql = chat_with_model(system_prompt_gen, user_prompt_gen)
@@ -130,15 +149,16 @@ def main():
     user_prompt_refine = f"Schema:\n{schema_str}\n\nInitial SQL:\n{initial_sql}\n\nRefine this SQL query."
 
     refined_sql = chat_with_model(system_prompt_refine, user_prompt_refine)
-    # refined_sql = refined_sql.strip()
-    
-    if refined_sql.startswith("```sql"):
-        refined_sql = refined_sql.replace("```sql", "").replace("```", "").strip()
-    refined_sql = refined_sql.replace("DATE_SUB(CURDATE(), INTERVAL 30 DAY)", "DATE('now', '-30 day')")
-    refined_sql = refined_sql.replace("CURDATE()", "DATE('now')")
-    print("\nRefined SQL:\n", refined_sql)
-    simulate_query(refined_sql)
 
-    
+    print("\nRefined SQL from model:\n", refined_sql)
+
+    # Step 5: Clean SQL to ensure it runs on SQLite
+    cleaned_sql = clean_sql(refined_sql)
+    print("\nCleaned SQL to run:\n", cleaned_sql)
+
+    # Step 6: Simulate the query on a mock database
+    simulate_query(cleaned_sql)
+
+
 if __name__ == "__main__":
     main()
