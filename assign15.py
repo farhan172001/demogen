@@ -71,3 +71,4 @@ if __name__ == "__main__":
 # npm install -g @mermaid-js/mermaid-cli
 # mmdc -h
 
+# User enters credentials → Auth service verifies credentials → On success, a JWT token is issued → Token sent to frontend → User accesses dashboard
