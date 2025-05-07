@@ -130,10 +130,10 @@ def main():
     user_prompt_refine = f"Schema:\n{schema_str}\n\nInitial SQL:\n{initial_sql}\n\nRefine this SQL query."
 
     refined_sql = chat_with_model(system_prompt_refine, user_prompt_refine)
-    refined_sql = refined_sql.strip()
+    # refined_sql = refined_sql.strip()
     
-    if refined_sql.lower().startswith("sql"):
-        refined_sql = refined_sql.partition('\n')[2].strip()
+    if refined_sql.startswith("```sql"):
+        refined_sql = refined_sql.replace("```sql", "").replace("```", "").strip()
     print("\nRefined SQL:\n", refined_sql)
     simulate_query(refined_sql)
 
