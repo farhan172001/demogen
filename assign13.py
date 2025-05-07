@@ -134,6 +134,8 @@ def main():
     
     if refined_sql.startswith("```sql"):
         refined_sql = refined_sql.replace("```sql", "").replace("```", "").strip()
+    refined_sql = refined_sql.replace("DATE_SUB(CURDATE(), INTERVAL 30 DAY)", "DATE('now', '-30 day')")
+    refined_sql = refined_sql.replace("CURDATE()", "DATE('now')")
     print("\nRefined SQL:\n", refined_sql)
     simulate_query(refined_sql)
 
