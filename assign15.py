@@ -41,7 +41,9 @@ def save_mermaid_file(code, filename="diagram.mmd"):
 
 def render_mermaid(filename="diagram.mmd", output="diagram.png"):
     try:
-        subprocess.run(["mmdc", "-i", filename, "-o", output], check=True)
+        # Full path to mmdc.cmd
+        mmdc_path = r"C:\Users\fkhan9\AppData\Roaming\npm\mmdc.cmd"
+        subprocess.run([mmdc_path, "-i", filename, "-o", output], check=True)
         print(f"Diagram saved as {output}")
     except Exception as e:
         print("Rendering failed. Make sure mermaid-cli is installed and working.")
