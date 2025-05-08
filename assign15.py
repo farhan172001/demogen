@@ -90,3 +90,5 @@ if __name__ == "__main__":
 # pip install requests
 # npm install -g @mermaid-js/mermaid-cli
 # Make sure 'mmdc' is added to PATH or update MMDC_PATH in script
+# User submits login → Auth service verifies → On success JWT is issued → Token goes to frontend → Dashboard is displayed
+# User submits login credentials → Authentication service verifies them → If valid, issues a JWT token → Token is stored on the client side → User accesses the dashboard → Dashboard shows personalized data from the database
