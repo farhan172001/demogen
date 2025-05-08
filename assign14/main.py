@@ -105,14 +105,19 @@ def load_snippets():
     snippets = []
     filenames = []
     for fname in os.listdir(SNIPPET_DIR):
-        print("Found file:", fname)
         path = os.path.join(SNIPPET_DIR, fname)
+        if not fname.endswith((".py", ".txt")):
+            continue  # Skip non-code files
         with open(path, "r") as f:
             code = f.read()
             if code.strip():  # Ignore empty files
                 snippets.append(code)
                 filenames.append(fname)
+                print("✅ Loaded:", fname)
+            else:
+                print("⚠️ Skipped empty file:", fname)
     
+    print(f"\nTotal loaded: {len(snippets)}\n")
     return snippets, filenames
 
 
