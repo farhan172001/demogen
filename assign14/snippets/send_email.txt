@@ -1,0 +1,13 @@
+import smtplib
+from email.mime.text import MIMEText
+
+def send_email(subject, body, to_email):
+    msg = MIMEText(body, "plain")
+    msg["Subject"] = subject
+    msg["From"] = "noreply@example.com"
+    msg["To"] = to_email
+
+    with smtplib.SMTP("smtp.example.com", 587) as server:
+        server.starttls()
+        server.login("user", "pass")
+        server.send_message(msg)
