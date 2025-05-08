@@ -169,3 +169,5 @@ if __name__ == "__main__":
     
 # pip install sentence-transformers scikit-learn numpy requests
 
+# Make a FastAPI endpoint that allows a user to upload a file and saves it to disk.
+# Create a function to send an email with both HTML and plain text support using Python.
