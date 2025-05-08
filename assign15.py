@@ -3,9 +3,12 @@ import requests
 import subprocess
 import os
 
+# === CONFIGURATION ===
 API_URL = "https://openai-api-wrapper-urtjok3rza-wl.a.run.app/api/chat/completions/"
-API_KEY = "YOUR_API_KEY"  # Replace with your key
+API_KEY = "YOUR_API_KEY"  # 🔑 Replace this with your actual API key
+MMDC_PATH = r"C:\Users\fkhan9\AppData\Roaming\npm\mmdc.cmd"  # Update path if needed
 
+# === FUNCTION TO CALL THE MODEL ===
 def call_model(system_prompt, user_prompt):
     headers = {
         'x-api-token': API_KEY,
@@ -28,49 +31,62 @@ def call_model(system_prompt, user_prompt):
         response.raise_for_status()
         return response.json()["choices"][0]["message"]["content"]
     except Exception as e:
-        print("Error calling API:", e)
+        print("❌ Error calling API:", e)
         return ""
 
+# === VALIDATION FUNCTION ===
 def validate_mermaid_code(code):
-    required_keywords = ["graph", "flowchart", "-->"]
-    return any(kw in code for kw in required_keywords)
+    stripped = code.strip()
+    return stripped.startswith("flowchart TD") or stripped.startswith("graph TD")
 
+# === STRIP CODE BLOCK FENCING ===
+def clean_mermaid_code(code):
+    if "```" in code:
+        code = code.strip().replace("```mermaid", "").replace("```", "").strip()
+    return code
+
+# === SAVE TO FILE ===
 def save_mermaid_file(code, filename="diagram.mmd"):
     with open(filename, "w") as f:
         f.write(code)
 
+# === RENDER USING MMDC ===
 def render_mermaid(filename="diagram.mmd", output="diagram.png"):
     try:
-        # Full path to mmdc.cmd
-        mmdc_path = r"C:\Users\fkhan9\AppData\Roaming\npm\mmdc.cmd"
-        subprocess.run([mmdc_path, "-i", filename, "-o", output], check=True)
-        print(f"Diagram saved as {output}")
+        subprocess.run([MMDC_PATH, "-i", filename, "-o", output], check=True)
+        print(f"\n✅ Diagram rendered and saved as: {output}")
     except Exception as e:
-        print("Rendering failed. Make sure mermaid-cli is installed and working.")
+        print("❌ Rendering failed. Make sure Mermaid CLI is installed.")
         print("Error:", e)
 
-# === MAIN FLOW ===
+# === MAIN SCRIPT ===
 if __name__ == "__main__":
-    user_description = input("Describe your system or process:\n")
+    print("📥 Describe your system or process. Example:")
+    print("User enters credentials → Auth service verifies → JWT issued → Token sent → Dashboard accessed")
+    user_description = input("\n🧾 Your description:\n")
 
     # Step 1: Generate MermaidJS Code
-    system_prompt = "Convert the following system/process description into a MermaidJS flowchart. Use 'flowchart TD' syntax."
+    system_prompt = "Convert the following system/process description into a MermaidJS diagram using 'flowchart TD' format only. Do not wrap in code blocks."
     mermaid_code = call_model(system_prompt, user_description)
+    mermaid_code = clean_mermaid_code(mermaid_code)
 
-    # Step 2: Validate the Code
+    # Step 2: Validate
     if not validate_mermaid_code(mermaid_code):
-        print("\n⚠️ Mermaid code validation failed. Attempting to fix it...")
-        fix_prompt = "Fix this MermaidJS diagram code. Correct syntax and structure."
+        print("\n⚠️ Mermaid code validation failed. Attempting auto-fix...")
+        fix_prompt = "Fix the following MermaidJS diagram code. Ensure it's in correct 'flowchart TD' syntax and don't wrap in code block."
         mermaid_code = call_model(fix_prompt, mermaid_code)
+        mermaid_code = clean_mermaid_code(mermaid_code)
 
-    # Step 3: Save and Render the Diagram
+    # Step 3: Save and Render
+    print("\n🧪 Mermaid Code to Render:\n")
+    print(mermaid_code)
+
     save_mermaid_file(mermaid_code)
     render_mermaid()
 
-    print("\n✅ Final Mermaid Code:\n")
-    print(mermaid_code)
-    
-# npm install -g @mermaid-js/mermaid-cli
-# mmdc -h
+    print("\n🎉 Done! Check the generated diagram image.")
 
-# User enters credentials → Auth service verifies credentials → On success, a JWT token is issued → Token sent to frontend → User accesses dashboard
+# === Requirements ===
+# pip install requests
+# npm install -g @mermaid-js/mermaid-cli
+# Make sure 'mmdc' is added to PATH or update MMDC_PATH in script
