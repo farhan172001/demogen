@@ -1,4 +1,3 @@
-
 import os
 import time
 import json
@@ -312,19 +311,9 @@ class CodeGenerator:
             for i, snippet in enumerate(snippets)
         ])
         
-        system_message = """You are an expert Python developer. Your task is to generate initial boilerplate code 
-        based on the user's requirement and the provided code examples. Focus on incorporating the best patterns
-        from the examples while meeting the specific needs in the requirement."""
+        system_message = "You are an expert Python developer. Your task is to generate initial boilerplate code based on the user's requirement and the provided code examples. Focus on incorporating the best patterns from the examples while meeting the specific needs in the requirement."
         
-        user_message = f"""Requirement: {requirement}
-
-Here are some relevant code examples that might be helpful:
-
-{snippets_text}
-
-Please generate a Python implementation that fulfills the requirement, inspired by these examples.
-Include appropriate imports, error handling, and comments.
-"""
+        user_message = f"Requirement: {requirement}\n\nHere are some relevant code examples that might be helpful:\n\n{snippets_text}\n\nPlease generate a Python implementation that fulfills the requirement, inspired by these examples.\nInclude appropriate imports, error handling, and comments."
 
         messages = [
             {"role": "system", "content": system_message},
@@ -339,26 +328,9 @@ Include appropriate imports, error handling, and comments.
     
     def _refactor_code(self, requirement: str, initial_code: str) -> Optional[str]:
         """Refactor the initial code for better quality."""
-        system_message = """You are an expert Python developer specializing in code refactoring.
-        Your task is to refactor the provided code to improve:
-        1. Readability: Use clear variable names, add helpful comments, and improve documentation
-        2. Efficiency: Optimize performance where possible
-        3. Maintainability: Follow best practices and design patterns
-        4. Error handling: Ensure robust error handling
-        5. Testing: Add appropriate assertions or test suggestions
+        system_message = "You are an expert Python developer specializing in code refactoring. Your task is to refactor the provided code to improve: 1. Readability: Use clear variable names, add helpful comments, and improve documentation 2. Efficiency: Optimize performance where possible 3. Maintainability: Follow best practices and design patterns 4. Error handling: Ensure robust error handling 5. Testing: Add appropriate assertions or test suggestions. Return only the refactored code without explanations."
         
-        Return only the refactored code without explanations."""
-        
-        user_message = f"""Original requirement: {requirement}
-
-Here's the initial code that needs refactoring:
-
-```python
-{initial_code}
-```
-
-Please refactor this code to improve its quality while maintaining its functionality.
-"""
+        user_message = f"Original requirement: {requirement}\n\nHere's the initial code that needs refactoring:\n\n```python\n{initial_code}\n```\n\nPlease refactor this code to improve its quality while maintaining its functionality."
 
         messages = [
             {"role": "system", "content": system_message},
@@ -395,155 +367,27 @@ def main():
     # Sample code snippets for the library
     sample_snippets = [
         {
-            "content": """
-import smtplib
-from email.message import EmailMessage
-
-def send_email(subject, body, to_email, from_email, smtp_server, port, username, password):
-    """Send a simple email message."""
-    msg = EmailMessage()
-    msg.set_content(body)
-    msg['Subject'] = subject
-    msg['From'] = from_email
-    msg['To'] = to_email
-    
-    try:
-        with smtplib.SMTP(smtp_server, port) as server:
-            server.starttls()
-            server.login(username, password)
-            server.send_message(msg)
-            return True
-    except Exception as e:
-        print(f"Failed to send email: {e}")
-        return False
-""",
+            "content": "import smtplib\nfrom email.message import EmailMessage\n\ndef send_email(subject, body, to_email, from_email, smtp_server, port, username, password):\n    \"\"\"Send a simple email message.\"\"\"\n    msg = EmailMessage()\n    msg.set_content(body)\n    msg['Subject'] = subject\n    msg['From'] = from_email\n    msg['To'] = to_email\n    \n    try:\n        with smtplib.SMTP(smtp_server, port) as server:\n            server.starttls()\n            server.login(username, password)\n            server.send_message(msg)\n            return True\n    except Exception as e:\n        print(f\"Failed to send email: {e}\")\n        return False",
             "description": "Basic email sending function",
             "tags": ["email", "smtp", "communication"]
         },
         {
-            "content": """
-import smtplib
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
-
-def send_html_email(subject, text_content, html_content, to_email, from_email, smtp_server, port, username, password):
-    """Send an email with both plain text and HTML content."""
-    msg = MIMEMultipart("alternative")
-    msg['Subject'] = subject
-    msg['From'] = from_email
-    msg['To'] = to_email
-    
-    # Attach parts
-    part1 = MIMEText(text_content, "plain")
-    part2 = MIMEText(html_content, "html")
-    msg.attach(part1)
-    msg.attach(part2)
-    
-    try:
-        with smtplib.SMTP(smtp_server, port) as server:
-            server.starttls()
-            server.login(username, password)
-            server.sendmail(from_email, to_email, msg.as_string())
-            return True
-    except Exception as e:
-        print(f"Failed to send email: {e}")
-        return False
-""",
+            "content": "import smtplib\nfrom email.mime.multipart import MIMEMultipart\nfrom email.mime.text import MIMEText\n\ndef send_html_email(subject, text_content, html_content, to_email, from_email, smtp_server, port, username, password):\n    \"\"\"Send an email with both plain text and HTML content.\"\"\"\n    msg = MIMEMultipart(\"alternative\")\n    msg['Subject'] = subject\n    msg['From'] = from_email\n    msg['To'] = to_email\n    \n    # Attach parts\n    part1 = MIMEText(text_content, \"plain\")\n    part2 = MIMEText(html_content, \"html\")\n    msg.attach(part1)\n    msg.attach(part2)\n    \n    try:\n        with smtplib.SMTP(smtp_server, port) as server:\n            server.starttls()\n            server.login(username, password)\n            server.sendmail(from_email, to_email, msg.as_string())\n            return True\n    except Exception as e:\n        print(f\"Failed to send email: {e}\")\n        return False",
             "description": "HTML email sending function",
             "tags": ["email", "html", "communication"]
         },
         {
-            "content": """
-import logging
-
-def setup_logger(name, log_file, level=logging.INFO, format_str=None):
-    """Set up a logger with file and console handlers."""
-    if format_str is None:
-        format_str = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-    
-    # Create logger
-    logger = logging.getLogger(name)
-    logger.setLevel(level)
-    
-    # Create file handler
-    file_handler = logging.FileHandler(log_file)
-    file_handler.setFormatter(logging.Formatter(format_str))
-    logger.addHandler(file_handler)
-    
-    # Create console handler
-    console_handler = logging.StreamHandler()
-    console_handler.setFormatter(logging.Formatter(format_str))
-    logger.addHandler(console_handler)
-    
-    return logger
-""",
+            "content": "import logging\n\ndef setup_logger(name, log_file, level=logging.INFO, format_str=None):\n    \"\"\"Set up a logger with file and console handlers.\"\"\"\n    if format_str is None:\n        format_str = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'\n    \n    # Create logger\n    logger = logging.getLogger(name)\n    logger.setLevel(level)\n    \n    # Create file handler\n    file_handler = logging.FileHandler(log_file)\n    file_handler.setFormatter(logging.Formatter(format_str))\n    logger.addHandler(file_handler)\n    \n    # Create console handler\n    console_handler = logging.StreamHandler()\n    console_handler.setFormatter(logging.Formatter(format_str))\n    logger.addHandler(console_handler)\n    \n    return logger",
             "description": "Logging setup function",
             "tags": ["logging", "utility"]
         },
         {
-            "content": """
-import requests
-import time
-
-def retry_request(url, max_retries=3, backoff_factor=0.5, **kwargs):
-    """Make HTTP request with retry logic."""
-    for attempt in range(max_retries):
-        try:
-            response = requests.get(url, **kwargs)
-            response.raise_for_status()
-            return response
-        except (requests.exceptions.RequestException) as e:
-            if attempt == max_retries - 1:
-                raise
-            
-            wait_time = backoff_factor * (2 ** attempt)
-            print(f"Request failed: {e}. Retrying in {wait_time:.2f} seconds...")
-            time.sleep(wait_time)
-""",
+            "content": "import requests\nimport time\n\ndef retry_request(url, max_retries=3, backoff_factor=0.5, **kwargs):\n    \"\"\"Make HTTP request with retry logic.\"\"\"\n    for attempt in range(max_retries):\n        try:\n            response = requests.get(url, **kwargs)\n            response.raise_for_status()\n            return response\n        except (requests.exceptions.RequestException) as e:\n            if attempt == max_retries - 1:\n                raise\n            \n            wait_time = backoff_factor * (2 ** attempt)\n            print(f\"Request failed: {e}. Retrying in {wait_time:.2f} seconds...\")\n            time.sleep(wait_time)",
             "description": "HTTP request with retry logic",
             "tags": ["http", "retry", "networking"]
         },
         {
-            "content": """
-import json
-from dataclasses import dataclass, asdict
-from typing import List, Dict, Any, Optional
-
-@dataclass
-class User:
-    name: str
-    email: str
-    age: int
-    is_active: bool = True
-    metadata: Optional[Dict[str, Any]] = None
-    
-    def to_json(self) -> str:
-        """Convert to JSON string."""
-        return json.dumps(asdict(self))
-    
-    @classmethod
-    def from_json(cls, json_str: str) -> 'User':
-        """Create from JSON string."""
-        data = json.loads(json_str)
-        return cls(**data)
-
-@dataclass
-class UserCollection:
-    users: List[User]
-    
-    def save_to_file(self, filename: str) -> None:
-        """Save users to a JSON file."""
-        with open(filename, 'w') as f:
-            json.dump([asdict(user) for user in self.users], f, indent=2)
-    
-    @classmethod
-    def load_from_file(cls, filename: str) -> 'UserCollection':
-        """Load users from a JSON file."""
-        with open(filename, 'r') as f:
-            data = json.load(f)
-            users = [User(**user_data) for user_data in data]
-            return cls(users)
-""",
+            "content": "import json\nfrom dataclasses import dataclass, asdict\nfrom typing import List, Dict, Any, Optional\n\n@dataclass\nclass User:\n    name: str\n    email: str\n    age: int\n    is_active: bool = True\n    metadata: Optional[Dict[str, Any]] = None\n    \n    def to_json(self) -> str:\n        \"\"\"Convert to JSON string.\"\"\"\n        return json.dumps(asdict(self))\n    \n    @classmethod\n    def from_json(cls, json_str: str) -> 'User':\n        \"\"\"Create from JSON string.\"\"\"\n        data = json.loads(json_str)\n        return cls(**data)\n\n@dataclass\nclass UserCollection:\n    users: List[User]\n    \n    def save_to_file(self, filename: str) -> None:\n        \"\"\"Save users to a JSON file.\"\"\"\n        with open(filename, 'w') as f:\n            json.dump([asdict(user) for user in self.users], f, indent=2)\n    \n    @classmethod\n    def load_from_file(cls, filename: str) -> 'UserCollection':\n        \"\"\"Load users from a JSON file.\"\"\"\n        with open(filename, 'r') as f:\n            data = json.load(f)\n            users = [User(**user_data) for user_data in data]\n            return cls(users)",
             "description": "Data classes with JSON serialization",
             "tags": ["dataclass", "serialization", "json"]
         }
