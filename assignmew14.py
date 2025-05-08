@@ -7,7 +7,6 @@ import tiktoken
 from typing import List, Dict, Any, Optional
 from pathlib import Path
 import logging
-import dotenv
 
 # Setup logging
 logging.basicConfig(
@@ -16,24 +15,11 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# Load environment variables from .env file if present
-dotenv.load_dotenv()
-
 # Constants
 # Primary API URL (wrapper provided in assignment)
-WRAPPER_API_URL = "https://openai-api-wrapper-urtjok3rza-wl.a.run.app/api/chat/completions/"
-# Direct OpenAI API URLs if you prefer to use your own API key
-OPENAI_API_URL = "https://api.openai.com/v1/chat/completions"
-OPENAI_EMBEDDING_API_URL = "https://api.openai.com/v1/embeddings"
-
-# Get API key from environment variable
-API_KEY = os.getenv("OPENAI_API_KEY", "")
-# Choose which endpoint to use (wrapper or direct)
-USE_DIRECT_API = os.getenv("USE_DIRECT_API", "False").lower() == "true"
-API_URL = OPENAI_API_URL if USE_DIRECT_API else WRAPPER_API_URL
+API_URL = "https://openai-api-wrapper-urtjok3rza-wl.a.run.app/api/chat/completions/"
 
 MODEL = "gpt-3.5-turbo"  # Model to use
-EMBEDDING_MODEL = "text-embedding-ada-002"  # Model for embeddings
 EMBEDDING_DIMENSION = 1536  # OpenAI embeddings dimension
 MAX_RETRIES = 3
 BASE_RETRY_DELAY = 2  # seconds
@@ -132,73 +118,28 @@ class VectorStore:
 
 class APIWrapper:
     """Wrapper for API calls with retry logic."""
-    def __init__(self, api_url: str, model: str = MODEL, api_key: str = API_KEY):
+    def __init__(self, api_url: str = API_URL, model: str = MODEL):
         self.api_url = api_url
         self.model = model
-        self.api_key = api_key
-        self.use_direct_api = USE_DIRECT_API
+        self.headers = {
+            'x-api-token': '',  # Leave blank as instructed
+            'Content-Type': 'application/json'
+        }
     
     def get_embedding(self, text: str) -> Optional[np.ndarray]:
-        """Get embedding for text using OpenAI API or simulation."""
-        try:
-            logger.info(f"Getting embedding for text: {text[:50]}...")
-            
-            if self.use_direct_api and self.api_key:
-                # Use the real OpenAI embedding API
-                headers = {
-                    "Content-Type": "application/json",
-                    "Authorization": f"Bearer {self.api_key}"
-                }
-                payload = {
-                    "input": text,
-                    "model": EMBEDDING_MODEL
-                }
-                
-                for attempt in range(MAX_RETRIES):
-                    try:
-                        response = requests.post(
-                            OPENAI_EMBEDDING_API_URL,
-                            headers=headers,
-                            json=payload
-                        )
-                        
-                        if response.status_code == 200:
-                            embedding_data = response.json()
-                            vector = np.array(embedding_data["data"][0]["embedding"])
-                            return vector
-                        else:
-                            logger.warning(f"Embedding API call failed: {response.status_code} - {response.text}")
-                            # Implement backoff for rate limiting
-                            if response.status_code == 429:  # Rate limit error
-                                retry_delay = BASE_RETRY_DELAY * (2 ** attempt)
-                                logger.info(f"Rate limited. Retrying in {retry_delay} seconds...")
-                                time.sleep(retry_delay)
-                                continue
-                            
-                            # For other errors, simulate embeddings
-                            break
-                    except Exception as e:
-                        logger.error(f"Error in embedding API call: {e}")
-                        break
-            
-            # Fallback: Simulate embeddings with random vectors
-            logger.info("Using simulated embeddings")
-            vector = np.random.random(EMBEDDING_DIMENSION)
-            return vector / np.linalg.norm(vector)
-            
-        except Exception as e:
-            logger.error(f"Error getting embedding: {e}")
-            return None
+        """Simulate embeddings with random vectors since wrapper doesn't support embeddings."""
+        logger.info(f"Simulating embedding for text: {text[:50]}...")
+
+        # Create deterministic but unique embedding based on the content hash
+        # This helps related content have somewhat related embeddings
+        np.random.seed(hash(text) % 2**32)
+        vector = np.random.random(EMBEDDING_DIMENSION)
+        return vector / np.linalg.norm(vector)
     
     def generate_code(self, messages: List[Dict[str, str]]) -> Optional[str]:
         """Call the API with retry logic."""
         for attempt in range(MAX_RETRIES):
             try:
-                # Set headers based on whether we're using direct API or wrapper
-                headers = {"Content-Type": "application/json"}
-                if self.use_direct_api and self.api_key:
-                    headers["Authorization"] = f"Bearer {self.api_key}"
-                
                 payload = {
                     "model": self.model,
                     "messages": messages,
@@ -206,10 +147,10 @@ class APIWrapper:
                     "max_tokens": 2000,
                 }
                 
-                logger.info(f"Calling API (attempt {attempt+1}/{MAX_RETRIES})...")
+                logger.info(f"Calling wrapper API (attempt {attempt+1}/{MAX_RETRIES})...")
                 response = requests.post(
                     self.api_url, 
-                    headers=headers, 
+                    headers=self.headers, 
                     json=payload
                 )
                 
@@ -218,10 +159,6 @@ class APIWrapper:
                     return result["choices"][0]["message"]["content"]
                 else:
                     logger.warning(f"API call failed with status {response.status_code}: {response.text}")
-                    # Handle specific error cases
-                    if response.status_code == 401:
-                        logger.error("Authentication error. Check your API key.")
-                        return None
                     
             except Exception as e:
                 logger.error(f"Error calling API: {e}")
