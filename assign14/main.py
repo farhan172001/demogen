@@ -97,14 +97,24 @@ EMBEDDING_MODEL = SentenceTransformer("all-MiniLM-L6-v2")
 
 # === STEP 1: LOAD & EMBED CODE SNIPPETS ===
 def load_snippets():
+    print("Looking in:", os.path.abspath(SNIPPET_DIR))
+    if not os.path.exists(SNIPPET_DIR):
+        print("❌ 'snippets' folder not found!")
+        return [], []
+    
     snippets = []
     filenames = []
     for fname in os.listdir(SNIPPET_DIR):
-        if fname.endswith(".py"):
-            with open(os.path.join(SNIPPET_DIR, fname), "r") as f:
-                snippets.append(f.read())
+        print("Found file:", fname)
+        path = os.path.join(SNIPPET_DIR, fname)
+        with open(path, "r") as f:
+            code = f.read()
+            if code.strip():  # Ignore empty files
+                snippets.append(code)
                 filenames.append(fname)
+    
     return snippets, filenames
+
 
 def embed_snippets(snippets):
     embeddings = EMBEDDING_MODEL.encode(snippets)
