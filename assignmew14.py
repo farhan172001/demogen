@@ -348,3 +348,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+    
+# Create a FastAPI endpoint to upload a file and save it to a local directory with error handling
