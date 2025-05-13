@@ -54,102 +54,71 @@
 # print(response)
 
 
-import os
+import fitz
+import textwrap
 import requests
 import json
-import time
-import fitz  # PyMuPDF
+from sklearn.feature_extraction.text import TfidfVectorizer
+import numpy as np
 
 API_URL = "https://openai-api-wrapper-urtjok3rza-wl.a.run.app/api/chat/completions/"
-API_TOKEN = "your-api-token-here"  # Replace with actual token
-DOC_DOWNLOAD_URL = "https://your-company-domain.com/handbooks"  
+API_TOKEN = "your-api-token-here"
+HEADERS = {'x-api-token': API_TOKEN, 'Content-Type': 'application/json'}
 
-HEADERS = {
-    'x-api-token': API_TOKEN,
-    'Content-Type': 'application/json'
-}
+# Step 1: Extract text from the PDF
+def extract_text_from_pdf(pdf_path):
+    doc = fitz.open(pdf_path)
+    text = ""
+    for page in doc:
+        text += page.get_text()
+    return text
 
-# Extract text from all PDFs in the docs folder
-def load_pdf_documents(doc_folder="docs"):
-    documents = []
-    if not os.path.exists(doc_folder):
-        print(f"Folder not found: {doc_folder}")
-        return documents
+# Step 2: Chunk the text
+def chunk_text(text, chunk_size=2000):
+    return textwrap.wrap(text, chunk_size)
 
-    for filename in os.listdir(doc_folder):
-        file_path = os.path.join(doc_folder, filename)
-        if filename.endswith(".pdf"):
-            try:
-                with fitz.open(file_path) as doc:
-                    text = ""
-                    for page in doc:
-                        text += page.get_text()
-                    documents.append((filename, text.strip()))
-            except Exception as e:
-                print(f"Error reading {filename}: {e}")
-    return documents
+# Load PDF and vectorize
+text = extract_text_from_pdf("your_pdf_file.pdf")
+chunks = chunk_text(text)
+vectorizer = TfidfVectorizer()
+vectors = vectorizer.fit_transform(chunks)
 
-# Build prompt for OpenAI
-def build_prompt(docs, user_question):
-    context = "\n\n---\n\n".join([f"# {name}\n{content}" for name, content in docs])
-    messages = [
-        {
-            "role": "system",
-            "content": (
-                "You are an assistant that answers questions only from the provided company documents. "
-                "If the answer is not present, say: 'I don't have this information.' "
-                f"Also mention: 'User can download the related handbooks and documents from the following URL: {DOC_DOWNLOAD_URL}'"
-            )
-        },
-        {
-            "role": "user",
-            "content": f"{context}\n\n---\n\nQuestion: {user_question}"
-        }
-    ]
-    return messages
+# Step 3: Find most relevant chunk with similarity check
+def get_relevant_chunk(query, threshold=0.1):
+    query_vector = vectorizer.transform([query])
+    similarity_scores = (vectors * query_vector.T).toarray().flatten()
+    best_score = np.max(similarity_scores)
+    if best_score < threshold:
+        return None
+    best_index = np.argmax(similarity_scores)
+    return chunks[best_index]
 
-# Query OpenAI Wrapper API
-def query_openai(messages, retries=3, backoff=2):
+# Step 4: Build prompt
+def build_prompt(relevant_chunk, user_question):
+    return f"Context:\n{relevant_chunk}\n\nQuestion: {user_question}\nAnswer:"
+
+# Step 5: Query OpenAI
+def query_openai(messages):
     payload = {
         "model": "gpt-3.5-turbo",
-        "messages": messages,
-        "max_tokens": 512,
-        "temperature": 0,
-        "top_p": 1
+        "messages": [
+            {"role": "system", "content": "You are a helpful assistant."},
+            {"role": "user", "content": messages}
+        ],
+        "max_tokens": 500,
+        "temperature": 0.5
     }
+    response = requests.post(API_URL, headers=HEADERS, data=json.dumps(payload))
+    return response.json()["choices"][0]["message"]["content"]
 
-    for attempt in range(retries):
-        try:
-            response = requests.post(API_URL, headers=HEADERS, data=json.dumps(payload))
-            if response.status_code == 200:
-                return response.json()["choices"][0]["message"]["content"]
-            else:
-                print(f"[Attempt {attempt+1}] Error {response.status_code}: {response.text}")
-                time.sleep(backoff ** attempt)
-        except Exception as e:
-            print(f"[Attempt {attempt+1}] Exception: {e}")
-            time.sleep(backoff ** attempt)
-    return "Failed to get a response from the model."
+# Step 6: Get dynamic input and respond
+user_question = input("Ask your question: ")
+relevant_chunk = get_relevant_chunk(user_question)
 
-# Main loop
-def main():
-    print("Loading PDF documents...")
-    documents = load_pdf_documents()
-    if not documents:
-        print("No PDF documents found in 'docs/' folder.")
-        return
+if relevant_chunk:
+    prompt = build_prompt(relevant_chunk, user_question)
+    answer = query_openai(prompt)
+else:
+    answer = "I don't have this information."
 
-    print("Documents loaded. Ask your questions!")
-    print("Type 'exit' to quit.\n")
-
-    while True:
-        question = input("You: ")
-        if question.strip().lower() == "exit":
-            break
-
-        messages = build_prompt(documents, question)
-        response = query_openai(messages)
-        print(f"\nHashBot: {response}\n")
-
-if __name__ == "__main__":
-    main()
+print("\nAnswer:", answer)
