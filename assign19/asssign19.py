@@ -109,3 +109,22 @@ if __name__ == "__main__":
 
 
 # What are the differences between the Pediatric Concerns section in Document 1 and Document 2?
+
+# "What are the differences in the 'Vital Signs' section between Document 1 (Adult Report) and Document 2 (Children Report)?"
+
+# "How does the 'Immunization Record' section in Document 1 compare to the one in Document 2?"
+
+# "Are there any notable differences in the 'Doctor’s Recommendations' section for adults and children?"
+
+# "What is the distinction between the 'Developmental Milestones' section in Document 2 and 'Medical History' in Document 1?"
+
+
+# "How does the 'Height' data in Document 1 (Adult Report) differ from the 'Height' data in Document 2 (Children Report)?"
+
+# "What variations can be found between the 'Weight' section for adults in Document 1 and children in Document 2?"
+
+# "How does the immunization record differ for children and adults in terms of recommended vaccinations in both reports?"
+
+# "What are the differences in 'Pediatric Concerns' in Document 2 compared to the medical concerns mentioned in Document 1?"
+
+# "What are the key differences between the 'Growth Advice' section for children in Document 2 and for adults in Document 1?"
