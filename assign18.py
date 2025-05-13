@@ -2,7 +2,7 @@ import os
 import requests
 import json
 import time
-import fitz  # PyMuPDF
+import fitz  
 
 API_URL = "https://openai-api-wrapper-urtjok3rza-wl.a.run.app/api/chat/completions/"
 API_TOKEN = "your-api-token-here"  # Replace this with your actual token
@@ -11,7 +11,7 @@ HEADERS = {
     'x-api-token': API_TOKEN,
     'Content-Type': 'application/json'
 }
-
+    
 def extract_text_from_pdf(file_path):
     try:
         doc = fitz.open(file_path)
@@ -23,7 +23,7 @@ def extract_text_from_pdf(file_path):
     except Exception as e:
         print(f"Failed to read {file_path}: {e}")
         return ""
-
+    
 def load_documents(doc_folder="docs"):
     docs = []
     if not os.path.exists(doc_folder):
@@ -37,6 +37,7 @@ def load_documents(doc_folder="docs"):
             if content:
                 docs.append((filename, content))
     return docs
+
 
 def build_prompt(docs, user_question):
     context = "\n\n---\n\n".join([f"# {name}\n{content}" for name, content in docs])
