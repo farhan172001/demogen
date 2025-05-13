@@ -353,3 +353,136 @@ if __name__ == "__main__":
 # Send a simple email using SMTP with subject, body, and login authentication.
 # Send an HTML email with both plain text and HTML content using SMTP.
 # Create a logger that logs both to a file and to the console in a specific format.
+
+
+
+# HTML Email Sending Function
+# Description: Sends an email with both plain text and HTML parts using SMTP.
+
+
+# import smtplib
+# from email.mime.multipart import MIMEMultipart
+# from email.mime.text import MIMEText
+
+# def send_html_email(subject, text_content, html_content, to_email, from_email, smtp_server, port, username, password):
+#     """
+#     Send an email with both plain text and HTML content.
+#     """
+#     msg = MIMEMultipart("alternative")
+#     msg['Subject'] = subject
+#     msg['From'] = from_email
+#     msg['To'] = to_email
+
+#     # Attach plain text and HTML parts
+#     part1 = MIMEText(text_content, "plain")
+#     part2 = MIMEText(html_content, "html")
+#     msg.attach(part1)
+#     msg.attach(part2)
+
+#     try:
+#         with smtplib.SMTP(smtp_server, port) as server:
+#             server.starttls()
+#             server.login(username, password)
+#             server.sendmail(from_email, to_email, msg.as_string())
+#             return True
+#     except Exception as e:
+#         print(f"Failed to send email: {e}")
+#         return False
+# Tags: email, html, communication
+
+# Logging Setup Function
+# Description: Creates and configures a logger that writes logs to both a file and the console.
+
+# import logging
+
+# def setup_logger(name, log_file, level=logging.INFO, format_str=None):
+#     """
+#     Set up a logger with file and console handlers.
+#     """
+#     if format_str is None:
+#         format_str = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+
+#     # Create logger
+#     logger = logging.getLogger(name)
+#     logger.setLevel(level)
+
+#     # File handler
+#     file_handler = logging.FileHandler(log_file)
+#     file_handler.setFormatter(logging.Formatter(format_str))
+#     logger.addHandler(file_handler)
+
+#     # Console handler
+#     console_handler = logging.StreamHandler()
+#     console_handler.setFormatter(logging.Formatter(format_str))
+#     logger.addHandler(console_handler)
+
+#     return logger
+# Tags: logging, utility
+
+#  HTTP Request with Retry Logic
+# Description: Makes an HTTP request with automatic retries using exponential backoff.
+
+
+# import requests
+# import time
+
+# def retry_request(url, max_retries=3, backoff_factor=0.5, **kwargs):
+#     """
+#     Make HTTP request with retry logic using exponential backoff.
+#     """
+#     for attempt in range(max_retries):
+#         try:
+#             response = requests.get(url, **kwargs)
+#             response.raise_for_status()
+#             return response
+#         except requests.exceptions.RequestException as e:
+#             if attempt == max_retries - 1:
+#                 raise
+#             wait_time = backoff_factor * (2 ** attempt)
+#             print(f"Request failed: {e}. Retrying in {wait_time:.2f} seconds...")
+#             time.sleep(wait_time)
+# Tags: http, retry, networking
+
+#  Data Classes with JSON Serialization
+# Description: Defines data classes User and UserCollection for handling user data with JSON serialization/deserialization.
+
+
+# import json
+# from dataclasses import dataclass, asdict
+# from typing import List, Dict, Any, Optional
+
+# @dataclass
+# class User:
+#     name: str
+#     email: str
+#     age: int
+#     is_active: bool = True
+#     metadata: Optional[Dict[str, Any]] = None
+
+#     def to_json(self) -> str:
+#         """Convert User instance to JSON string."""
+#         return json.dumps(asdict(self))
+
+#     @classmethod
+#     def from_json(cls, json_str: str) -> 'User':
+#         """Create User instance from JSON string."""
+#         data = json.loads(json_str)
+#         return cls(**data)
+
+# @dataclass
+# class UserCollection:
+#     users: List[User]
+
+#     def save_to_file(self, filename: str) -> None:
+#         """Save list of users to a JSON file."""
+#         with open(filename, 'w') as f:
+#             json.dump([asdict(user) for user in self.users], f, indent=2)
+
+#     @classmethod
+#     def load_from_file(cls, filename: str) -> 'UserCollection':
+#         """Load users from a JSON file and return a UserCollection."""
+#         with open(filename, 'r') as f:
+#             data = json.load(f)
+#             users = [User(**user_data) for user_data in data]
+#             return cls(users)
+# Tags: dataclass, serialization, json
