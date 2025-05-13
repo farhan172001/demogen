@@ -2,6 +2,7 @@ import os
 import requests
 import json
 import time
+import fitz  # PyMuPDF
 
 API_URL = "https://openai-api-wrapper-urtjok3rza-wl.a.run.app/api/chat/completions/"
 API_TOKEN = "your-api-token-here"  # Replace this with your actual token
@@ -11,6 +12,18 @@ HEADERS = {
     'Content-Type': 'application/json'
 }
 
+def extract_text_from_pdf(file_path):
+    try:
+        doc = fitz.open(file_path)
+        text = ""
+        for page in doc:
+            text += page.get_text()
+        doc.close()
+        return text.strip()
+    except Exception as e:
+        print(f"Failed to read {file_path}: {e}")
+        return ""
+
 def load_documents(doc_folder="docs"):
     docs = []
     if not os.path.exists(doc_folder):
@@ -19,9 +32,9 @@ def load_documents(doc_folder="docs"):
 
     for filename in os.listdir(doc_folder):
         file_path = os.path.join(doc_folder, filename)
-        if os.path.isfile(file_path) and filename.endswith(".txt"):
-            with open(file_path, 'r', encoding='utf-8') as f:
-                content = f.read()
+        if os.path.isfile(file_path) and filename.endswith(".pdf"):
+            content = extract_text_from_pdf(file_path)
+            if content:
                 docs.append((filename, content))
     return docs
 
@@ -65,7 +78,7 @@ def main():
     print("Loading documents...")
     documents = load_documents()
     if not documents:
-        print("No documents found. Please add files in the 'docs/' folder.")
+        print("No documents found. Please add PDF files in the 'docs/' folder.")
         return
 
     print("Documents loaded. Ask your questions!")
