@@ -98,3 +98,17 @@ if __name__ == "__main__":
         # Output the answer
         print(f"\nQuestion: {question}")
         print(f"Answer: {answer}\n" + "-" * 80)
+        
+        
+        
+# How does the structure of patient information differ between the adult and child report?
+
+# What are the unique fields in the child's report not found in the adult report?
+
+# How is lifestyle data handled in adult checkups compared to pediatric ones?
+
+# What role does the immunization record play in child reports and how would that be adapted for adults?
+
+# How does the recommendation section differ in tone, detail, and focus between the two?
+
+
