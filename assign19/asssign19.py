@@ -7,7 +7,7 @@ import numpy as np
 
 # === CONFIG ===
 API_URL = "https://openai-api-wrapper-urtjok3rza-wl.a.run.app/api/chat/completions/"
-API_TOKEN = "your-api-token-here"  
+API_TOKEN = "your-api-token-here"  # Replace with your actual token
 HEADERS = {
     'x-api-token': API_TOKEN,
     'Content-Type': 'application/json'
@@ -30,8 +30,10 @@ def get_relevant_chunk(query, vectorizer, vectors, chunks, threshold=0.1):
     query_vector = vectorizer.transform([query])
     similarity_scores = (vectors * query_vector.T).toarray().flatten()
     best_score = np.max(similarity_scores)
+    
     if best_score < threshold:
-        return None
+        return None  # Return None if no relevant chunk is found
+    
     best_index = np.argmax(similarity_scores)
     return chunks[best_index]
 
@@ -88,8 +90,14 @@ if __name__ == "__main__":
             break
         
         # Find relevant chunks for the question in both documents
-        relevant_chunk1 = get_relevant_chunk(question, vectorizer, vectors, chunks1) or ""
-        relevant_chunk2 = get_relevant_chunk(question, vectorizer, vectors, chunks2) or ""
+        relevant_chunk1 = get_relevant_chunk(question, vectorizer, vectors, chunks1)
+        relevant_chunk2 = get_relevant_chunk(question, vectorizer, vectors, chunks2)
+
+        # If no relevant chunk is found for a document, handle gracefully
+        if not relevant_chunk1:
+            relevant_chunk1 = "No relevant information found in Document 1."
+        if not relevant_chunk2:
+            relevant_chunk2 = "No relevant information found in Document 2."
 
         # Build the prompt and get the answer
         prompt = build_prompt(relevant_chunk1, relevant_chunk2, question)
@@ -98,17 +106,3 @@ if __name__ == "__main__":
         # Output the answer
         print(f"\nQuestion: {question}")
         print(f"Answer: {answer}\n" + "-" * 80)
-        
-        
-        
-# How does the structure of patient information differ between the adult and child report?
-
-# What are the unique fields in the child's report not found in the adult report?
-
-# How is lifestyle data handled in adult checkups compared to pediatric ones?
-
-# What role does the immunization record play in child reports and how would that be adapted for adults?
-
-# How does the recommendation section differ in tone, detail, and focus between the two?
-
-
