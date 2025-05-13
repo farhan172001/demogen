@@ -350,3 +350,6 @@ if __name__ == "__main__":
     main()
     
 # Create a FastAPI endpoint to upload a file and save it to a local directory with error handling
+# Send a simple email using SMTP with subject, body, and login authentication.
+# Send an HTML email with both plain text and HTML content using SMTP.
+# Create a logger that logs both to a file and to the console in a specific format.
