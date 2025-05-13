@@ -106,3 +106,6 @@ if __name__ == "__main__":
         # Output the answer
         print(f"\nQuestion: {question}")
         print(f"Answer: {answer}\n" + "-" * 80)
+
+
+# What are the differences between the Pediatric Concerns section in Document 1 and Document 2?
