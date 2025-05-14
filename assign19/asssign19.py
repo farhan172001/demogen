@@ -70,15 +70,23 @@ if __name__ == "__main__":
     # Load and chunk Document 1 (Adult General Checkup)
     text1 = extract_text_from_pdf("Document1.pdf")
     chunks1 = chunk_text(text1)
+    
+    # Vectorize Document 1
+    vectorizer1 = TfidfVectorizer()
+    vectors1 = vectorizer1.fit_transform(chunks1)
 
     # Load and chunk Document 2 (Child General Checkup)
     text2 = extract_text_from_pdf("Document2.pdf")
     chunks2 = chunk_text(text2)
+    
+    # Vectorize Document 2
+    vectorizer2 = TfidfVectorizer()
+    vectors2 = vectorizer2.fit_transform(chunks2)
 
-    # Combine all chunks for vectorization
-    all_chunks = chunks1 + chunks2
-    vectorizer = TfidfVectorizer()
-    vectors = vectorizer.fit_transform(all_chunks)
+    # # Combine all chunks for vectorization
+    # all_chunks = chunks1 + chunks2
+    # vectorizer = TfidfVectorizer()
+    # vectors = vectorizer.fit_transform(all_chunks)
 
     # Ask the user for questions dynamically
     print("Please enter your questions below. Type 'exit' to stop.")
@@ -90,8 +98,8 @@ if __name__ == "__main__":
             break
         
         # Find relevant chunks for the question in both documents
-        relevant_chunk1 = get_relevant_chunk(question, vectorizer, vectors, chunks1)
-        relevant_chunk2 = get_relevant_chunk(question, vectorizer, vectors, chunks2)
+        relevant_chunk1 = get_relevant_chunk(question, vectorizer1, vectors1, chunks1)
+        relevant_chunk2 = get_relevant_chunk(question, vectorizer2, vectors2, chunks2)
 
         # If no relevant chunk is found for a document, handle gracefully
         if not relevant_chunk1:
