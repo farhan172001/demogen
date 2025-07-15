@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import axios from "axios";
 
 export default function SignUpPage() {
   const [form, setForm] = useState({
@@ -13,18 +12,71 @@ export default function SignUpPage() {
     password: ''
   });
 
+  const [errors, setErrors] = useState({});
   const [message, setMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
+  const validateField = (name, value) => {
+    switch (name) {
+      case 'firstName':
+      case 'lastName':
+        return value.length < 2 ? 'Must be at least 2 characters' : '';
+      case 'phone':
+        return !/^\+?[\d\s\-\(\)]{10,}$/.test(value) ? 'Please enter a valid phone number' : '';
+      case 'company':
+        return value.length < 2 ? 'Company name is required' : '';
+      case 'jobRole':
+        return value.length < 2 ? 'Job role is required' : '';
+      case 'email':
+        return !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) ? 'Please enter a valid email' : '';
+      case 'username':
+        return value.length < 3 ? 'Username must be at least 3 characters' : '';
+      case 'password':
+        return value.length < 6 ? 'Password must be at least 6 characters' : '';
+      default:
+        return '';
+    }
+  };
+
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setForm({ ...form, [name]: value });
+    
+    // Clear error when user starts typing
+    if (errors[name]) {
+      setErrors({ ...errors, [name]: '' });
+    }
+  };
+
+  const handleBlur = (e) => {
+    const { name, value } = e.target;
+    const error = validateField(name, value);
+    setErrors({ ...errors, [name]: error });
   };
 
   const handleSignup = async (e) => {
     e.preventDefault();
+    
+    // Validate all fields
+    const newErrors = {};
+    Object.keys(form).forEach(field => {
+      const error = validateField(field, form[field]);
+      if (error) newErrors[field] = error;
+    });
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+
     setIsLoading(true);
     try {
-      await axios.post('/api/signup', form);
+      // Replace with actual API call
+      // await axios.post('/api/signup', form);
+      
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
       setMessage('Account created successfully! Redirecting to login...');
       setTimeout(() => {
         window.location.href = '/login';
@@ -36,72 +88,111 @@ export default function SignUpPage() {
     }
   };
 
+  const formFields = [
+    { name: "firstName", label: "First Name", type: "text", required: true },
+    { name: "lastName", label: "Last Name", type: "text", required: true },
+    { name: "phone", label: "Phone Number", type: "tel", required: true },
+    { name: "company", label: "Company Name", type: "text", required: true },
+    { name: "jobRole", label: "Job Role", type: "text", required: true },
+    { name: "email", label: "Email Address", type: "email", required: true },
+    { name: "username", label: "Username", type: "text", required: true },
+    { name: "password", label: "Password", type: "password", required: true }
+  ];
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-300 p-4">
-      <div className="w-full max-w-xl bg-white p-10 rounded-2xl shadow-xl border border-gray-200">
-        <h1 className="text-4xl font-bold text-center text-gray-800 mb-8">Sign Up</h1>
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-cyan-50 flex items-center justify-center p-4">
+      <div className="w-full max-w-lg bg-white/80 backdrop-blur-sm p-8 rounded-3xl shadow-2xl border border-white/20">
+        <div className="text-center mb-8">
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-2">
+            Create Account
+          </h1>
+          <p className="text-gray-600">Join us and start your journey</p>
+        </div>
 
         {message && (
-          <div className={`mb-6 p-4 rounded-lg text-center ${
+          <div className={`mb-6 p-4 rounded-xl text-center font-medium ${
             message.includes('successfully')
-              ? 'bg-green-50 text-green-700 border border-green-300'
-              : 'bg-red-50 text-red-700 border border-red-300'
+              ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+              : 'bg-red-50 text-red-700 border border-red-200'
           }`}>
             {message}
           </div>
         )}
 
-        <form onSubmit={handleSignup} className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          {[
-            { name: "firstName", label: "First Name" },
-            { name: "lastName", label: "Last Name" },
-            { name: "phone", label: "Phone Number", type: "tel" },
-            { name: "company", label: "Company Name" },
-            { name: "jobRole", label: "Job Role" },
-            { name: "email", label: "Email Address", type: "email" },
-            { name: "username", label: "Username" },
-            { name: "password", label: "Password", type: "password" }
-          ].map(({ name, label, type = "text" }) => (
-            <div key={name} className="relative">
+        <div className="space-y-6">
+          {formFields.map(({ name, label, type, required }) => (
+            <div key={name} className="relative group">
               <input
                 type={type}
                 name={name}
                 value={form[name]}
                 onChange={handleChange}
+                onBlur={handleBlur}
                 placeholder=" "
-                required
-                className="peer w-full px-3 pt-6 pb-2 text-gray-900 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-transparent"
+                required={required}
+                className={`peer w-full px-4 pt-6 pb-2 text-gray-900 placeholder-transparent bg-gray-50/50 border-2 rounded-xl transition-all duration-300 focus:outline-none focus:bg-white ${
+                  errors[name] 
+                    ? 'border-red-300 focus:border-red-500 focus:ring-4 focus:ring-red-100' 
+                    : 'border-gray-200 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100'
+                } ${form[name] ? 'border-indigo-300' : ''}`}
               />
               <label
                 htmlFor={name}
-                className="absolute left-3 top-2 text-sm text-gray-600 transition-all peer-placeholder-shown:top-5 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-focus:top-2 peer-focus:text-sm peer-focus:text-blue-600 bg-white px-1"
+                className={`absolute left-4 transition-all duration-300 pointer-events-none ${
+                  errors[name] ? 'text-red-500' : 'text-gray-500'
+                } peer-placeholder-shown:top-4 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-focus:top-2 peer-focus:text-sm peer-focus:text-indigo-600 ${
+                  form[name] ? 'top-2 text-sm text-indigo-600' : 'top-2 text-sm'
+                }`}
               >
-                {label}
+                {label} {required && <span className="text-red-500">*</span>}
               </label>
+              {errors[name] && (
+                <p className="mt-1 text-sm text-red-600 flex items-center">
+                  <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                  </svg>
+                  {errors[name]}
+                </p>
+              )}
             </div>
           ))}
 
-          <div className="col-span-full mt-2">
+          <div className="pt-4">
             <button
               type="submit"
               disabled={isLoading}
-              className={`w-full py-3 rounded-lg text-white font-semibold shadow-md transition-transform ${
+              onClick={handleSignup}
+              className={`w-full py-4 rounded-xl text-white font-semibold shadow-lg transition-all duration-300 ${
                 isLoading
                   ? 'bg-gray-400 cursor-not-allowed'
-                  : 'bg-gradient-to-r from-blue-600 to-purple-600 hover:scale-[1.02] active:scale-95'
+                  : 'bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 hover:shadow-xl hover:scale-[1.02] active:scale-95'
               }`}
             >
               {isLoading ? (
                 <div className="flex items-center justify-center">
-                  <div className="animate-spin h-5 w-5 border-b-2 border-white mr-2 rounded-full"></div>
+                  <div className="animate-spin h-5 w-5 border-b-2 border-white mr-3 rounded-full"></div>
                   Creating Account...
                 </div>
               ) : (
-                "Create Account"
+                <span className="flex items-center justify-center">
+                  <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                  Create Account
+                </span>
               )}
             </button>
           </div>
-        </form>
+
+          <div className="text-center pt-4 border-t border-gray-200">
+            <p className="text-gray-600">
+              Already have an account?{' '}
+              <a href="/login" className="text-indigo-600 hover:text-indigo-800 font-semibold transition-colors">
+                Sign In
+              </a>
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   );
