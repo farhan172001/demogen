@@ -146,3 +146,237 @@ return (
     </form>
   </div>
 );
+
+
+// new
+import React, { useState } from "react";
+import axios from "axios";
+
+export default function SignUpPage() {
+  const [form, setForm] = useState({
+    firstName: '',
+    lastName: '',
+    phone: '',
+    company: '',
+    jobRole: '',
+    email: '',
+    username: '',
+    password: ''
+  });
+
+  const [message, setMessage] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  const handleSignup = async (e) => {
+    e.preventDefault();
+    setIsLoading(true);
+    try {
+      await axios.post('/api/signup', form);
+      setMessage('Account created successfully! Redirecting to login...');
+      setTimeout(() => {
+        window.location.href = '/login';
+      }, 1500);
+    } catch (err) {
+      setMessage('Signup failed. User may already exist.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center p-4">
+      <div className="w-full max-w-2xl">
+        <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
+          {/* Header */}
+          <div className="text-center mb-8">
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">Create Account</h1>
+            <p className="text-gray-600">Join us today and get started</p>
+          </div>
+
+          {/* Message */}
+          {message && (
+            <div className={`mb-6 p-4 rounded-lg text-center ${
+              message.includes('successfully') 
+                ? 'bg-green-50 text-green-700 border border-green-200' 
+                : 'bg-red-50 text-red-700 border border-red-200'
+            }`}>
+              {message}
+            </div>
+          )}
+
+          <form onSubmit={handleSignup} className="space-y-6">
+            {/* Personal Information */}
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Personal Information</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    First Name
+                  </label>
+                  <input 
+                    name="firstName" 
+                    placeholder="Enter your first name" 
+                    value={form.firstName} 
+                    onChange={handleChange} 
+                    required 
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 placeholder-gray-400"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Last Name
+                  </label>
+                  <input 
+                    name="lastName" 
+                    placeholder="Enter your last name" 
+                    value={form.lastName} 
+                    onChange={handleChange} 
+                    required 
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 placeholder-gray-400"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Contact Information */}
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Contact Information</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Phone Number
+                  </label>
+                  <input 
+                    name="phone" 
+                    placeholder="Enter your phone number" 
+                    value={form.phone} 
+                    onChange={handleChange} 
+                    required 
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 placeholder-gray-400"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Email Address
+                  </label>
+                  <input 
+                    type="email" 
+                    name="email" 
+                    placeholder="Enter your email" 
+                    value={form.email} 
+                    onChange={handleChange} 
+                    required 
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 placeholder-gray-400"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Professional Information */}
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Professional Information</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Company Name
+                  </label>
+                  <input 
+                    name="company" 
+                    placeholder="Enter your company" 
+                    value={form.company} 
+                    onChange={handleChange} 
+                    required 
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 placeholder-gray-400"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Job Role
+                  </label>
+                  <input 
+                    name="jobRole" 
+                    placeholder="Enter your job role" 
+                    value={form.jobRole} 
+                    onChange={handleChange} 
+                    required 
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 placeholder-gray-400"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Account Information */}
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Account Information</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Username
+                  </label>
+                  <input 
+                    name="username" 
+                    placeholder="Choose a username" 
+                    value={form.username} 
+                    onChange={handleChange} 
+                    required 
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 placeholder-gray-400"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Password
+                  </label>
+                  <input 
+                    type="password" 
+                    name="password" 
+                    placeholder="Create a password" 
+                    value={form.password} 
+                    onChange={handleChange} 
+                    required 
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 placeholder-gray-400"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Submit Button */}
+            <div className="pt-4">
+              <button 
+                type="submit" 
+                disabled={isLoading}
+                className={`w-full py-4 px-6 rounded-lg font-semibold text-white transition-all duration-200 transform ${
+                  isLoading 
+                    ? 'bg-gray-400 cursor-not-allowed' 
+                    : 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 hover:scale-105 active:scale-95'
+                } shadow-lg`}
+              >
+                {isLoading ? (
+                  <div className="flex items-center justify-center">
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                    Creating Account...
+                  </div>
+                ) : (
+                  'Create Account'
+                )}
+              </button>
+            </div>
+
+            {/* Footer */}
+            <div className="text-center pt-4 border-t border-gray-200">
+              <p className="text-gray-600">
+                Already have an account? 
+                <a href="/login" className="text-blue-600 hover:text-blue-700 font-medium ml-1">
+                  Sign in here
+                </a>
+              </p>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  );
+}
