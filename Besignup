@@ -85,3 +85,46 @@ app.post('/api/login', (req, res) => {
 app.listen(PORT, () => {
   console.log(`✅ Server running on http://localhost:${PORT}`);
 });
+
+
+
+
+// new fe
+const handleSignup = async (e) => {
+  e.preventDefault();
+
+  const newErrors = {};
+  Object.keys(form).forEach(field => {
+    const error = validateField(field, form[field]);
+    if (error) newErrors[field] = error;
+  });
+
+  if (Object.keys(newErrors).length > 0) {
+    setErrors(newErrors);
+    return;
+  }
+
+  setIsLoading(true);
+  setErrors({});
+  setMessage('');
+
+  try {
+    // Hit backend signup endpoint
+    const response = await axios.post('/api/signup', form);
+
+    if (response.status === 201) {
+      setMessage('Account created successfully! Redirecting to login...');
+      setTimeout(() => {
+        window.location.href = '/login';
+      }, 1500);
+    }
+  } catch (err) {
+    if (err.response?.status === 409) {
+      setMessage('Signup failed. User already exists.');
+    } else {
+      setMessage('Signup failed. Please try again later.');
+    }
+  } finally {
+    setIsLoading(false);
+  }
+};
