@@ -55,3 +55,94 @@ export default function SignUpPage() {
     </div>
   );
 }
+
+
+
+
+return (
+  <div className="flex items-center justify-center min-h-screen bg-gray-100 px-4">
+    <form onSubmit={handleSignup} className="bg-white p-8 rounded shadow-md w-full max-w-lg">
+      <h2 className="text-2xl font-bold mb-6 text-center text-gray-800">Sign Up</h2>
+
+      {message && (
+        <p className="text-sm mb-4 text-center text-red-600">{message}</p>
+      )}
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <input
+          name="firstName"
+          placeholder="First Name"
+          value={form.firstName}
+          onChange={handleChange}
+          required
+          className="p-2 border rounded w-full"
+        />
+        <input
+          name="lastName"
+          placeholder="Last Name"
+          value={form.lastName}
+          onChange={handleChange}
+          required
+          className="p-2 border rounded w-full"
+        />
+        <input
+          name="phone"
+          placeholder="Phone Number"
+          value={form.phone}
+          onChange={handleChange}
+          required
+          className="p-2 border rounded w-full"
+        />
+        <input
+          name="company"
+          placeholder="Company Name"
+          value={form.company}
+          onChange={handleChange}
+          required
+          className="p-2 border rounded w-full"
+        />
+        <input
+          name="jobRole"
+          placeholder="Job Role"
+          value={form.jobRole}
+          onChange={handleChange}
+          required
+          className="p-2 border rounded w-full"
+        />
+        <input
+          type="email"
+          name="email"
+          placeholder="Email"
+          value={form.email}
+          onChange={handleChange}
+          required
+          className="p-2 border rounded w-full"
+        />
+        <input
+          name="username"
+          placeholder="Username"
+          value={form.username}
+          onChange={handleChange}
+          required
+          className="p-2 border rounded w-full"
+        />
+        <input
+          type="password"
+          name="password"
+          placeholder="Password"
+          value={form.password}
+          onChange={handleChange}
+          required
+          className="p-2 border rounded w-full"
+        />
+      </div>
+
+      <button
+        type="submit"
+        className="w-full mt-6 bg-green-600 text-white py-2 rounded hover:bg-green-700 transition"
+      >
+        Sign Up
+      </button>
+    </form>
+  </div>
+);
