@@ -37,25 +37,25 @@ export default function SignUpPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center p-4">
-      <div className="w-full max-w-md bg-white p-8 rounded-2xl shadow-lg border border-gray-200">
-        <h1 className="text-3xl font-bold text-gray-900 text-center mb-6">Sign Up</h1>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-300 p-4">
+      <div className="w-full max-w-xl bg-white p-10 rounded-2xl shadow-xl border border-gray-200">
+        <h1 className="text-4xl font-bold text-center text-gray-800 mb-8">Sign Up</h1>
 
         {message && (
           <div className={`mb-6 p-4 rounded-lg text-center ${
-            message.includes('successfully') 
-              ? 'bg-green-50 text-green-700 border border-green-200' 
-              : 'bg-red-50 text-red-700 border border-red-200'
+            message.includes('successfully')
+              ? 'bg-green-50 text-green-700 border border-green-300'
+              : 'bg-red-50 text-red-700 border border-red-300'
           }`}>
             {message}
           </div>
         )}
 
-        <form onSubmit={handleSignup} className="space-y-5">
+        <form onSubmit={handleSignup} className="grid grid-cols-1 md:grid-cols-2 gap-5">
           {[
             { name: "firstName", label: "First Name" },
             { name: "lastName", label: "Last Name" },
-            { name: "phone", label: "Phone Number" },
+            { name: "phone", label: "Phone Number", type: "tel" },
             { name: "company", label: "Company Name" },
             { name: "jobRole", label: "Job Role" },
             { name: "email", label: "Email Address", type: "email" },
@@ -70,35 +70,37 @@ export default function SignUpPage() {
                 onChange={handleChange}
                 placeholder=" "
                 required
-                className="peer w-full px-4 pt-6 pb-2 text-gray-900 placeholder-transparent border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="peer w-full px-3 pt-6 pb-2 text-gray-900 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-transparent"
               />
               <label
                 htmlFor={name}
-                className="absolute left-4 top-2 text-sm text-gray-600 transition-all peer-placeholder-shown:top-5 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-focus:top-2 peer-focus:text-sm peer-focus:text-blue-600 bg-white px-1"
+                className="absolute left-3 top-2 text-sm text-gray-600 transition-all peer-placeholder-shown:top-5 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-focus:top-2 peer-focus:text-sm peer-focus:text-blue-600 bg-white px-1"
               >
                 {label}
               </label>
             </div>
           ))}
 
-          <button
-            type="submit"
-            disabled={isLoading}
-            className={`w-full py-3 mt-2 rounded-lg text-white font-semibold shadow transition-all ${
-              isLoading
-                ? 'bg-gray-400 cursor-not-allowed'
-                : 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 hover:scale-[1.01] active:scale-95'
-            }`}
-          >
-            {isLoading ? (
-              <div className="flex items-center justify-center">
-                <div className="animate-spin h-5 w-5 border-b-2 border-white mr-2 rounded-full"></div>
-                Creating Account...
-              </div>
-            ) : (
-              "Create Account"
-            )}
-          </button>
+          <div className="col-span-full mt-2">
+            <button
+              type="submit"
+              disabled={isLoading}
+              className={`w-full py-3 rounded-lg text-white font-semibold shadow-md transition-transform ${
+                isLoading
+                  ? 'bg-gray-400 cursor-not-allowed'
+                  : 'bg-gradient-to-r from-blue-600 to-purple-600 hover:scale-[1.02] active:scale-95'
+              }`}
+            >
+              {isLoading ? (
+                <div className="flex items-center justify-center">
+                  <div className="animate-spin h-5 w-5 border-b-2 border-white mr-2 rounded-full"></div>
+                  Creating Account...
+                </div>
+              ) : (
+                "Create Account"
+              )}
+            </button>
+          </div>
         </form>
       </div>
     </div>
